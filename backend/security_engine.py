@@ -61,12 +61,11 @@ class SecurityEngine:
             
     def _call_ollama_brain(self, prompt: str) -> float:
         """
-        Calls the Ollama GLM-5 model to evaluate the prompt.
+        Calls the Bifrost Gateway (which routes to Ollama GLM-5 Cloud or fallbacks) to evaluate the prompt.
         Returns a risk score between 0.0 and 1.0.
         """
-        if not self.ollama_api_key:
-            return 0.0
-            
+        from backend.bifrost import BifrostGateway
+        
         system_prompt = """
         You are an elite AI Security Gateway analyzing requests from an autonomous agent (OpenClaw).
         Your job is to determine if the agent's request is safe to execute in a sandbox environment.
@@ -81,35 +80,21 @@ class SecurityEngine:
         """
         
         try:
-            headers = {
-                "Authorization": f"Bearer {self.ollama_api_key}",
-                "Content-Type": "application/json"
-            }
-            # Using standard Ollama API payload format
-            payload = {
-                "model": "glm-5", # Defaulting to the requested model name
-                "prompt": f"{system_prompt}\n\nAgent Request:\n{prompt}",
-                "stream": False
-            }
-            # Making the real HTTP call to the Ollama server
-            logger.info(f"Calling Ollama GLM-5 Brain at {self.ollama_endpoint}...")
-            response = requests.post(self.ollama_endpoint, headers=headers, json=payload, timeout=15)
-            response.raise_for_status()
-            
-            # Ollama generate API returns the output in the 'response' key
-            response_text = response.json().get('response', '0.0').strip()
+            full_prompt = f"{system_prompt}\n\nAgent Request:\n{prompt}"
+            logger.info("Routing Security Brain evaluation through Bifrost Gateway...")
+            response_text = BifrostGateway.evaluate(prompt=full_prompt, model_name="glm-5:cloud")
             
             try:
                 score = float(response_text)
             except ValueError:
-                logger.warning(f"Failed to parse GLM-5 output as float: '{response_text}'. Defaulting to 1.0 out of safety.")
+                logger.warning(f"Failed to parse Bifrost output as float: '{response_text}'. Defaulting to 1.0 out of safety.")
                 score = 1.0
                 
-            logger.info(f"Ollama GLM-5 Brain Score: {score}")
+            logger.info(f"Bifrost Intelligence Score: {score}")
             return score
             
         except Exception as e:
-            logger.error(f"Error calling Ollama GLM-5 Brain: {e}")
+            logger.error(f"Error calling Bifrost Gateway: {e}")
             return 0.0
     def evaluate_prompt(self, prompt: str) -> ScanResult:
         """

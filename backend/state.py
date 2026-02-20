@@ -15,7 +15,10 @@ POLICIES = {
 # Authorized Agents Data
 AGENTS = [
     {"id": "ag-hw1", "name": "OpenClaw", "role": "Local System Access", "tools": ["read_local_file"], "lastActive": "Just now", "status": "Active"},
-    {"id": "ag-hw2", "name": "WebSpider", "role": "Web Scraping & Analysis", "tools": ["fetch_website_content"], "lastActive": "Just now", "status": "Active"}
+    {"id": "ag-hw2", "name": "WebSpider", "role": "Web Scraping & Analysis", "tools": ["fetch_website_content"], "lastActive": "Just now", "status": "Active"},
+    {"id": "ag-fc1", "name": "DataCleaner", "role": "Financial Data Aggregation", "tools": ["analyze_transactions", "detect_suspicious_activity"], "lastActive": "Just now", "status": "Active"},
+    {"id": "ag-fc2", "name": "Validator", "role": "Compliance Report Generation", "tools": ["generate_compliance_report", "validate_input"], "lastActive": "Just now", "status": "Active"},
+    {"id": "ag-fc3", "name": "FirewallInterceptor", "role": "PII & Transaction Security", "tools": ["redact_sensitive_data", "block_unauthorized_transfers"], "lastActive": "Just now", "status": "Active"}
 ]
 
 class PolicyUpdate(BaseModel):
