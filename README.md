@@ -77,7 +77,15 @@ curl -X POST -H 'Content-Type: application/json' \
   -d '{"prompt": "whoami"}' \
   http://localhost:8000/gateway
 ```
-*Expected Result: HTTP 200 - Allowed and executed in sandbox.*
+*Expected Result:*
+```json
+{
+  "status": "success",
+  "message": "Prompt allowed and executed.",
+  "output": "user\n",
+  "details": "Clean"
+}
+```
 
 **Simulating a malicious request:**
 ```bash

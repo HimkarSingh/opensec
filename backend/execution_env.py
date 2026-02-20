@@ -32,14 +32,13 @@ class ExecutionEnvironment:
         try:
             logger.info("Initializing E2B Sandbox...")
             # We use the standard e2b Sandbox for general execution
-            with Sandbox(api_key=self.api_key) as sandbox:
+            with Sandbox.create(api_key=self.api_key) as sandbox:
                 logger.info(f"Running command: {command}")
-                process = sandbox.process.start(command)
-                process.wait()
+                result = sandbox.commands.run(command)
                 
-                output = process.stdout
-                if process.stderr:
-                    output += "\n[STDERR]:\n" + process.stderr
+                output = result.stdout
+                if result.stderr:
+                    output += "\n[STDERR]:\n" + result.stderr
                     
                 return output
         except Exception as e:

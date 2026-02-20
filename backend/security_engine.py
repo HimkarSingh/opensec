@@ -91,18 +91,20 @@ class SecurityEngine:
                 "prompt": f"{system_prompt}\n\nAgent Request:\n{prompt}",
                 "stream": False
             }
+            # Making the real HTTP call to the Ollama server
+            logger.info(f"Calling Ollama GLM-5 Brain at {self.ollama_endpoint}...")
+            response = requests.post(self.ollama_endpoint, headers=headers, json=payload, timeout=15)
+            response.raise_for_status()
             
-            # Note: We are mocking the actual HTTP call for this demonstration 
-            # as the provided API key (SSH key format) and endpoint (undefined) 
-            # won't resolve to a real running GLM-5 service here.
-            # In production, you would run:
-            # response = requests.post(self.ollama_endpoint, headers=headers, json=payload, timeout=10)
-            # score = float(response.json().get('response', '0').strip())
+            # Ollama generate API returns the output in the 'response' key
+            response_text = response.json().get('response', '0.0').strip()
             
-            # Mocking the engine logic based on keywords for demonstration:
-            bad_words = ["ignore previous instructions", "bypass security", "send password", "extract secret", "hack"]
-            score = 1.0 if any(word in prompt.lower() for word in bad_words) else 0.0
-            
+            try:
+                score = float(response_text)
+            except ValueError:
+                logger.warning(f"Failed to parse GLM-5 output as float: '{response_text}'. Defaulting to 1.0 out of safety.")
+                score = 1.0
+                
             logger.info(f"Ollama GLM-5 Brain Score: {score}")
             return score
             
