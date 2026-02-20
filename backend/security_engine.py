@@ -116,11 +116,14 @@ class SecurityEngine:
         Evaluate the prompt using both LLM Guard and LlamaFirewall.
         Returns the aggregated risk score and decision.
         """
+        from backend.state import POLICIES
+        
         risk_score = 0.0
         details = []
 
         # 1. LLM Guard Evaluation
-        if self.pi_scanner:
+        # Anti-Prompt Injection Policy
+        if POLICIES.get("promptInjection", True) and self.pi_scanner:
             try:
                 # PromptInjection scanner 
                 sanitized_prompt, is_valid, pi_score = self.pi_scanner.scan(prompt)
@@ -130,7 +133,8 @@ class SecurityEngine:
             except Exception as e:
                 logger.error(f"PI Scan error: {e}")
 
-        if self.secrets_scanner:
+        # Data Leakage Prevention Policy
+        if POLICIES.get("dataLeakage", True) and self.secrets_scanner:
             try:
                 sanitized_prompt, is_valid, sec_score = self.secrets_scanner.scan(prompt)
                 if not is_valid:
@@ -148,40 +152,40 @@ class SecurityEngine:
             except Exception as e:
                 logger.error(f"Topics Scan error: {e}")
 
-        # 2. LlamaFirewall Evaluation
-        try:
-            # Assume LlamaFirewall takes UserMessage and returns an object with a score or decision
-            msg = UserMessage(content=prompt)
-            # Evaluate using LlamaFirewall pattern
-            # Note: actual method name might differ, using a generic approach:
-            fw_result = self.firewall(msg)
-            
-            # Since we don't know the exact fw_result structure, we'll try to extract risk safely
-            # Assuming it might have a property like risk_score or is_safe
-            fw_score = getattr(fw_result, 'risk_score', 0.0)
-            
-            # If it just returns block/allow
-            if hasattr(fw_result, 'action') and str(fw_result.action).upper() == 'BLOCK':
-                fw_score = 1.0
+        # 2. LlamaFirewall Evaluation (also governed by Prompt Injection policy)
+        if POLICIES.get("promptInjection", True):
+            try:
+                # Assume LlamaFirewall takes UserMessage and returns an object with a score or decision
+                msg = UserMessage(content=prompt)
+                # Evaluate using LlamaFirewall pattern
+                fw_result = self.firewall(msg)
                 
-            risk_score = max(risk_score, fw_score)
-            if fw_score > 0.5:
-                details.append(f"LlamaFirewall flag (score: {fw_score})")
+                # Since we don't know the exact fw_result structure, we'll try to extract risk safely
+                fw_score = getattr(fw_result, 'risk_score', 0.0)
                 
-        except Exception as e:
-            logger.error(f"LlamaFirewall error: {e}")
-            
-        # 3. Ollama GLM-5 Cloud Brain Evaluation
-        ollama_score = self._call_ollama_brain(prompt)
-        if ollama_score > 0.5:
-            risk_score = max(risk_score, ollama_score)
-            details.append(f"Ollama GLM-5 Block (score: {ollama_score})")
+                # If it just returns block/allow
+                if hasattr(fw_result, 'action') and str(fw_result.action).upper() == 'BLOCK':
+                    fw_score = 1.0
+                    
+                risk_score = max(risk_score, fw_score)
+                if fw_score > 0.5:
+                    details.append(f"LlamaFirewall flag (score: {fw_score})")
+                    
+            except Exception as e:
+                logger.error(f"LlamaFirewall error: {e}")
+                
+            # 3. Ollama GLM-5 Cloud Brain Evaluation
+            ollama_score = self._call_ollama_brain(prompt)
+            if ollama_score > 0.5:
+                risk_score = max(risk_score, ollama_score)
+                details.append(f"Ollama GLM-5 Block (score: {ollama_score})")
 
-        # Fallback simple keyword match
-        bad_words = ["ignore previous", "system prompt", "bypass", "jailbreak"]
-        if risk_score == 0.0 and any(bw in prompt.lower() for bw in bad_words):
-            risk_score = max(risk_score, 0.9)
-            details.append("Fallback Keyword Match")
+        # Fallback simple keyword match (governed by Data Leakage policy alongside Secrets Scanner)
+        if POLICIES.get("dataLeakage", True):
+            bad_words = ["ignore previous", "system prompt", "bypass", "jailbreak", "/etc/passwd", ".env", "shadow", "secret", "malicious.html"]
+            if risk_score == 0.0 and any(bw in prompt.lower() for bw in bad_words):
+                risk_score = max(risk_score, 0.9)
+                details.append("Fallback Keyword Match")
 
         # Make final decision
         decision = ScanDecision.BLOCK if risk_score >= 0.5 else ScanDecision.ALLOW

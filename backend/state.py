@@ -12,12 +12,10 @@ POLICIES = {
     "dataLeakage": True
 }
 
-# Mock Agents Data
+# Authorized Agents Data
 AGENTS = [
-    {"id": "ag-01", "name": "CodeAssistant", "role": "Developer", "tools": ["Search", "File System", "Code Execution"], "lastActive": "Just now", "status": "Active"},
-    {"id": "ag-02", "name": "DataAnalyst", "role": "Analyst", "tools": ["Database", "Web Scraping"], "lastActive": "2 mins ago", "status": "Active"},
-    {"id": "ag-03", "name": "EmailBot", "role": "Communication", "tools": ["Email"], "lastActive": "15 mins ago", "status": "Suspended"},
-    {"id": "ag-04", "name": "ResearchBot", "role": "Researcher", "tools": ["Search", "Browser"], "lastActive": "5 mins ago", "status": "Active"},
+    {"id": "ag-hw1", "name": "OpenClaw", "role": "Local System Access", "tools": ["read_local_file"], "lastActive": "Just now", "status": "Active"},
+    {"id": "ag-hw2", "name": "WebSpider", "role": "Web Scraping & Analysis", "tools": ["fetch_website_content"], "lastActive": "Just now", "status": "Active"}
 ]
 
 class PolicyUpdate(BaseModel):
@@ -32,17 +30,17 @@ def get_stats(logs: List[Dict[str, Any]]):
     high_risk_alerts = sum(1 for log in logs if log.get("score", 0) >= 0.8 and log.get("decision") == "BLOCK")
     
     return {
-        "totalRequests": total_requests + 1420,  # Add some base numbers for demo
-        "blockedRequests": blocked_requests + 85,
+        "totalRequests": total_requests,
+        "blockedRequests": blocked_requests,
         "activeAgents": active_agents,
-        "highRiskAlerts": high_risk_alerts + 12
+        "highRiskAlerts": high_risk_alerts
     }
 
 def get_risk_analysis(logs: List[Dict[str, Any]]):
     # Calculate risk distribution
-    low = sum(1 for log in logs if log.get("score", 0) < 0.3) + 75
-    medium = sum(1 for log in logs if 0.3 <= log.get("score", 0) < 0.7) + 20
-    high = sum(1 for log in logs if log.get("score", 0) >= 0.7) + 5
+    low = sum(1 for log in logs if log.get("score", 0) < 0.3)
+    medium = sum(1 for log in logs if 0.3 <= log.get("score", 0) < 0.7)
+    high = sum(1 for log in logs if log.get("score", 0) >= 0.7)
     
     total = low + medium + high
     

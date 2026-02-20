@@ -60,6 +60,25 @@ async def security_gateway(request: AgentRequest):
 def root():
     return {"status": "OpenSec Gateway running"}
 
+@app.post("/api/validate")
+async def validate_request(request: AgentRequest):
+    """
+    Endpoint for local agents like OpenClaw.
+    Validates the prompt but DOES NOT execute it in E2B.
+    Returns ALLOW or BLOCK.
+    """
+    result = security_engine.evaluate_prompt(request.prompt)
+    log_event(request.prompt, result.score, result.decision.value)
+
+    if result.decision == ScanDecision.BLOCK:
+        raise HTTPException(status_code=403, detail=f"Security Block: {result.details}")
+    
+    return {
+        "status": "success",
+        "decision": "ALLOW",
+        "details": result.details
+    }
+
 def get_all_logs():
     try:
         if LOG_FILE.exists():

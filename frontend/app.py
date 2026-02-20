@@ -12,76 +12,91 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for Dark Theme & Neon Accents
+# Custom CSS for Sleek Dark & White Theme
 st.markdown("""
 <style>
     /* Global Theme */
     .stApp {
-        background: radial-gradient(circle at 10% 20%, #0a0a16 0%, #151528 100%);
-        color: #e0e0e0;
+        background-color: #000000;
+        color: #f0f0f0;
+        font-family: 'Inter', sans-serif;
+    /* Hide Streamlit Header Navbar */
+    [data-testid="stHeader"] {
+        display: none;
+    }
+    .block-container {
+        padding-top: 2rem !important;
     }
     
     /* Sidebar */
     [data-testid="stSidebar"] {
-        background: rgba(15, 15, 30, 0.95);
-        border-right: 1px solid #2a2a4a;
+        background-color: #000000;
+        border-right: 1px solid #1a1a1a;
+    }
+    /* Remove Sidebar Top Padding */
+    [data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+        padding-top: 2rem !important;
+    }
+    
+    /* Sidebar Text Input overrides */
+    [data-testid="stSidebar"] .stTextArea textarea {
+        background-color: #0a0a0a;
+        color: #ffffff;
+        border: 1px solid #333333;
+    }
+    [data-testid="stSidebar"] p {
+        color: #888888 !important;
     }
     
     /* Typography */
-    h1, h2, h3 {
-        color: #ffffff;
-        font-weight: 600;
-        letter-spacing: 0.5px;
+    h1, h2, h3, h4, h5, h6 {
+        color: #ffffff !important;
+        font-weight: 500;
+        letter-spacing: -0.5px;
     }
     
     /* Metric Cards */
     [data-testid="stMetricValue"] {
         font-size: 32px;
-        color: #00eaff !important;
-        text-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
+        color: #ffffff !important;
+        font-weight: 600;
+        text-shadow: none;
     }
     .stMetric {
-        background: linear-gradient(145deg, rgba(30,30,50,0.8), rgba(20,20,40,0.9));
+        background-color: transparent;
         padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #3d3d6b;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 6px;
+        border: 1px solid #333333;
+        transition: border 0.2s ease;
+        box-shadow: none;
     }
     .stMetric:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 40px rgba(0, 234, 255, 0.15);
-        border: 1px solid #00eaff;
+        border: 1px solid #ffffff;
+        transform: none;
     }
     
     /* Buttons */
     .stButton button {
-        background: linear-gradient(90deg, #00eaff, #0088ff);
-        color: #fff;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 24px;
-        transition: all 0.3s ease;
+        background: #ffffff;
+        color: #050505;
+        font-weight: 600;
+        border: 1px solid #ffffff;
+        border-radius: 4px;
+        padding: 8px 24px;
+        transition: all 0.2s ease;
     }
     .stButton button:hover {
-        background: linear-gradient(90deg, #00ffff, #00aaff);
-        box-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
-    }
-    /* Danger Buttons */
-    .btn-danger button {
-        background: linear-gradient(90deg, #ff4d4d, #cc0000);
-    }
-    .btn-danger button:hover {
-        background: linear-gradient(90deg, #ff6666, #ff0000);
-        box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
+        background: #050505;
+        color: #ffffff;
+        border: 1px solid #ffffff;
+        box-shadow: none;
     }
     
     /* Dataframe and Tables */
     [data-testid="stDataFrame"] {
-        background: rgba(20, 20, 40, 0.7);
-        border-radius: 10px;
-        border: 1px solid #2a2a4a;
+        background-color: #0a0a0a;
+        border-radius: 6px;
+        border: 1px solid #222222;
     }
     
     /* Tabs */
@@ -90,24 +105,24 @@ st.markdown("""
         background-color: transparent;
     }
     .stTabs [data-baseweb="tab"] {
-        color: #8888aa;
+        color: #666666;
         height: 50px;
-        font-weight: 600;
+        font-weight: 500;
         font-size: 16px;
     }
     .stTabs [aria-selected="true"] {
-        color: #00eaff !important;
-        border-bottom-color: #00eaff !important;
-        text-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
+        color: #ffffff !important;
+        border-bottom-color: #ffffff !important;
+        text-shadow: none;
     }
     
     /* Toggles */
     .st-bc {
-        background-color: #00eaff !important;
+        background-color: #ffffff !important;
     }
 
     hr {
-        border-color: #2a2a4a;
+        border-color: #222222;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -132,21 +147,52 @@ def post_api(endpoint, payload):
     except:
         return False
 
+def post_gateway(prompt):
+    try:
+        response = requests.post("http://localhost:8000/gateway", json={"prompt": prompt}, timeout=20)
+        if response.status_code == 200:
+            return True, response.json()
+        elif response.status_code == 403:
+            return False, response.json()
+        else:
+            return False, {"detail": f"HTTP {response.status_code}"}
+    except Exception as e:
+        return False, {"detail": str(e)}
+
 # Sidebar Navigation
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2092/2092663.png", width=60) # placeholder logo
     st.markdown("## 🛡️ **OpenSec**")
-    st.markdown("<p style='color:#8888aa; font-size: 14px; margin-top: -10px;'>AI Runtime Security</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8888aa; font-size: 14px; margin-top: -10px; font-weight: 500;'>Your Local Agentic Firewall</p>", unsafe_allow_html=True)
     st.markdown("---")
-    page = st.radio("Navigation", ["Dashboard", "Agents", "Policies", "Alerts & Logs"])
+    page = st.radio("Navigation", ["Dashboard", "Agents", "Policies", "Alerts & Logs"], label_visibility="collapsed")
     st.markdown("---")
     
-    # Simulate connection status
+    # Minimalist connection status
     stats = fetch_api("stats")
     if stats:
-        st.success("🟢 API Connected")
+        st.caption("🟢 System Online")
     else:
-        st.error("🔴 API Offline")
+        st.caption("🔴 System Offline")
+        
+    st.markdown("#### Terminal Emulator")
+    with st.form("agent_prompt_form", clear_on_submit=True):
+        agent_prompt = st.text_area("", placeholder="Enter action payload... (e.g. read file src/)", height=100, label_visibility="collapsed")
+        submit_prompt = st.form_submit_button("Execute")
+        
+    if submit_prompt and agent_prompt:
+        with st.spinner("Analyzing intent..."):
+            success, data = post_gateway(agent_prompt)
+            if success:
+                st.success("✅ **ALLOWED**")
+                with st.expander("Execution Output"):
+                    st.code(data.get("output", ""))
+            else:
+                st.error("🛑 **BLOCKED**")
+                # Handle different error formats safely
+                detail = data.get("detail", "Forbidden")
+                if isinstance(detail, list) and len(detail) > 0 and isinstance(detail[0], dict):
+                    detail = detail[0].get("msg", str(detail))
+                st.caption(f"Reason: {detail}")
 
 # Dashboard View
 if page == "Dashboard":
@@ -164,45 +210,24 @@ if page == "Dashboard":
         
     st.markdown("---")
     
-    # Two column layout for charts and recent activity
-    c1, c2 = st.columns([2, 1])
-    
-    with c1:
-        st.subheader("Risk Distribution")
-        risk_data = fetch_api("risk-analysis")
-        if risk_data:
-            # Prepare donut chart
-            metrics = risk_data['pieChart']
-            df = pd.DataFrame({"Risk Level": list(metrics.keys()), "Value": list(metrics.values())})
-            fig = px.pie(df, values='Value', names='Risk Level', hole=0.7,
-                         color='Risk Level', 
-                         color_discrete_map={'low':'#00cc99', 'medium':'#ffaa00', 'high':'#ff4da6'})
-            fig.update_layout(margin=dict(t=10, b=10, l=10, r=10), 
-                              paper_bgcolor='rgba(0,0,0,0)', 
-                              plot_bgcolor='rgba(0,0,0,0)',
-                              font=dict(color='#e0e0e0'))
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("No risk data available.")
-            
-    with c2:
-        st.subheader("Recent Blocks")
-        logs = fetch_api("logs")
-        if logs:
-            blocked_logs = [log for log in logs if log.get('decision') == 'BLOCK']
-            # Only show latest 5
-            for log in list(reversed(blocked_logs))[:5]:
-                with st.container():
-                    st.markdown(f'''
-                    <div style="background: rgba(255, 77, 166, 0.1); border-left: 3px solid #ff4da6; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                        <span style="color: #ff4da6; font-weight: bold; font-size: 12px;">{log["timestamp"]}</span><br>
-                        <span style="color: #ccc; font-size: 14px;">{log["prompt"][:50]}...</span>
-                    </div>
-                    ''', unsafe_allow_html=True)
-            if not blocked_logs:
-                st.success("No recent block events.")
-        else:
-            st.info("Log feed offline.")
+    # Recent Activity (Full width since pie chart is removed)
+    st.subheader("Recent Activity / Blocks")
+    logs = fetch_api("logs")
+    if logs:
+        blocked_logs = [log for log in logs if log.get('decision') == 'BLOCK']
+        # Only show latest 5
+        for log in list(reversed(blocked_logs))[:5]:
+            with st.container():
+                st.markdown(f'''
+                <div style="background: rgba(255, 255, 255, 0.05); border-left: 3px solid #ffffff; padding: 15px; margin-bottom: 15px; border-radius: 4px;">
+                    <span style="color: #ffffff; font-weight: bold; font-size: 12px;">{log["timestamp"]}</span><br>
+                    <span style="color: #aaaaaa; font-size: 14px;">{log["prompt"][:100]}...</span>
+                </div>
+                ''', unsafe_allow_html=True)
+        if not blocked_logs:
+            st.success("No recent block events recorded.")
+    else:
+        st.info("Log feed offline.")
 
 # Agents View
 elif page == "Agents":
@@ -213,8 +238,8 @@ elif page == "Agents":
         # Apply rudimentary styling
         def highlight_status(val):
             if val == 'Active':
-                return 'color: #00cc99; font-weight: bold'
-            return 'color: #ffaa00; font-weight: bold'
+                return 'color: #ffffff; font-weight: bold'
+            return 'color: #666666; font-weight: bold'
             
         st.dataframe(df.style.applymap(highlight_status, subset=['status']), 
                      use_container_width=True, hide_index=True)
@@ -272,7 +297,7 @@ elif page == "Alerts & Logs":
         # Display logic format
         def style_decision(val):
             if val == "BLOCK":
-                return "background-color: rgba(255, 77, 166, 0.2); color: #ff4da6; font-weight: bold;"
+                return "background-color: rgba(255, 77, 77, 0.15); color: #ff6666; font-weight: bold;"
             return "color: #00cc99;"
             
         st.dataframe(df.style.applymap(style_decision, subset=["decision"]),

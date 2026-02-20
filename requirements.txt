@@ -9,3 +9,4 @@ plotly
 e2b
 llm-guard
 python-dotenv
+beautifulsoup4
