@@ -93,14 +93,29 @@ INFO:     127.0.0.1:59190 - "GET /api/stats HTTP/1.1" 200 OK
 INFO:     127.0.0.1:59194 - "GET /api/logs HTTP/1.1" 200 OK
 INFO:     127.0.0.1:52206 - "GET /api/stats HTTP/1.1" 200 OK
 INFO:     127.0.0.1:52216 - "GET /api/logs HTTP/1.1" 200 OK
-ollama/glm-5:cloud at http://localhost:11434
-[BIFROST DEBUG] Response received successfully.
-INFO:     127.0.0.1:36972 - "POST /bifrost/v1/chat/completions HTTP/1.1" 200 OK
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [154124]
-[92m23:04:06 - LiteLLM:INFO[0m: logging_worker.py:444 - [LoggingWorker] atexit: Flushing 1 remaining events...
-INFO:LiteLLM:[LoggingWorker] atexit: Flushing 1 remaining events...
-[92m23:04:06 - LiteLLM:INFO[0m: logging_worker.py:444 - [LoggingWorker] atexit: Successfully flushed 1 events!
-INFO:LiteLLM:[LoggingWorker] atexit: Successfully flushed 1 events!
+INFO:     127.0.0.1:57944 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57952 - "GET /api/logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55174 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55176 - "GET /api/logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44930 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44934 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44950 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44960 - "GET /api/policies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44972 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44978 - "GET /api/logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52558 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52562 - "GET /api/logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59682 - "GET /api/logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33948 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33954 - "GET /api/logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46648 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46658 - "GET /api/logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46234 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46242 - "GET /api/logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53862 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53866 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51616 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51626 - "GET /api/policies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51636 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51638 - "GET /api/logs HTTP/1.1" 200 OK

@@ -1,13 +1,19 @@
 import streamlit as st
+from PIL import Image
 import requests
 import pandas as pd
 import plotly.express as px
 import time
 from datetime import datetime
 
+try:
+    logo = Image.open("frontend/views/Logo.png")
+except Exception:
+    logo = "🛡️"
+
 st.set_page_config(
     page_title="OpenSec | AI Runtime Security Platform",
-    page_icon="🛡️",
+    page_icon=logo,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -161,8 +167,16 @@ def post_gateway(prompt):
 
 # Sidebar Navigation
 with st.sidebar:
-    st.markdown("## 🛡️ **OpenSec**")
-    st.markdown("<p style='color:#8888aa; font-size: 14px; margin-top: -10px; font-weight: 500;'>Your Local Agentic Firewall</p>", unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        try:
+            st.image(logo, width=45)
+        except Exception:
+            pass
+    with col2:
+        st.markdown("<h3 style='margin-top: 5px; margin-bottom: 0;'>OpenSec</h3>", unsafe_allow_html=True)
+    
+    st.markdown("<p style='color:#8888aa; font-size: 14px; margin-top: 5px; font-weight: 500;'>Your Local Agentic Firewall</p>", unsafe_allow_html=True)
     st.markdown("---")
     page = st.radio("Navigation", ["Dashboard", "Agents", "Policies", "Alerts & Logs"], label_visibility="collapsed")
     st.markdown("---")
